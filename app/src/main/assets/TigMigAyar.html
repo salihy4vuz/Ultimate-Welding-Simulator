@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ultimate Kaynak Parametre Simülatörü</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #eef2f5;
+            color: #333;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+        }
+        .container {
+            background: #fff;
+            max-width: 1100px;
+            width: 100%;
+            border-radius: 12px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+            overflow: hidden;
+        }
+        .header {
+            background: #2c3e50;
+            color: #f1c40f;
+            padding: 20px;
+            text-align: center;
+            border-bottom: 4px solid #f1c40f;
+        }
+        .header-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding: 0 10px;
+        }
+        .logo-img {
+            max-height: 50px;
+        }
+        .lang-switch button {
+            background: #34495e;
+            color: white;
+            border: 1px solid #f1c40f;
+            padding: 5px 12px;
+            cursor: pointer;
+            border-radius: 4px;
+            font-weight: bold;
+            font-size: 13px;
+            margin-left: 5px;
+            transition: all 0.2s;
+        }
+        .lang-switch button:hover, .lang-switch button.active {
+            background: #f1c40f;
+            color: #2c3e50;
+        }
+        .header h2 { margin: 0; font-size: 24px; font-weight: 800; letter-spacing: 1px;}
+        .controls {
+            padding: 20px;
+            background: #ecf0f1;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 15px;
+        }
+        .controls-row-2 {
+            padding: 15px 20px;
+            background: #fafbfc;
+            border-bottom: 2px solid #dde1e5;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+        .form-group label {
+            font-weight: 700;
+            margin-bottom: 6px;
+            font-size: 12px;
+            color: #34495e;
+            text-transform: uppercase;
+        }
+        select, input[type="range"] {
+            padding: 10px;
+            border-radius: 6px;
+            border: 1px solid #bdc3c7;
+            font-size: 14px;
+            background-color: #fff;
+            font-weight: 600;
+        }
+        select:focus { outline: none; border-color: #f1c40f; }
+        .slider-header { display: flex; justify-content: space-between; }
+        .info-box {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 12px 15px;
+            border-radius: 4px;
+            font-size: 13px;
+            color: #856404;
+        }
+        .results {
+            padding: 20px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 12px;
+            background: #fff;
+        }
+        .card {
+            background: #fff;
+            border: 1px solid #eee;
+            border-radius: 6px;
+            padding: 12px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.04);
+            transition: all 0.2s ease-in-out;
+        }
+        .card:hover { transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
+        .card.highlight { border-left: 4px solid #e74c3c; background: #fcf3f2; }
+        .card.highlight-blue { border-left: 4px solid #3498db; background: #f1f8fc;}
+        .card.highlight-orange { border-left: 4px solid #f39c12; background: #fdf8f1;}
+        .card.highlight-green { border-left: 4px solid #27ae60; background: #f1fcf5;}
+        .card.highlight-purple { border-left: 4px solid #9b59b6; background: #f8f1fc;}
+        .card h4 { margin: 0 0 6px 0; font-size: 11px; color: #7f8c8d; text-transform: uppercase;}
+        .card .value { font-size: 17px; font-weight: 900; color: #2c3e50; line-height: 1.2;}
+        .critical-note { font-size: 11px; color: #c0392b; margin-top: 6px; display: block; font-weight: 600;}
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="header">
+        <!-- LOGO VE DİL SEÇİM ALANI -->
+        <div class="header-top">
+            <div class="lang-switch">
+                <button id="btn-tr" class="active" onclick="setLang('tr')">TR</button>
+                <button id="btn-en" onclick="setLang('en')">EN</button>
+            </div>
+        </div>
+        <h2 id="baslik">ULTIMATE KAYNAK SİMÜLATÖRÜ</h2>
+    </div>
+
+    <!-- AYARLAR -->
+    <div class="controls">
+        <div class="form-group">
+            <label id="lbl-yontem" for="yontem">Yöntem (Proses)</label>
+            <select id="yontem">
+                <option value="tig" id="opt-tig">TIG (Argon / GTAW)</option>
+                <option value="mig" id="opt-mig">MIG / MAG (Gazaltı / GMAW)</option>
+                <option value="mma" id="opt-mma">MMA (Elektrot / SMAW)</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label id="lbl-malzeme" for="malzeme">Ana Metal (Base Metal)</label>
+            <select id="malzeme">
+                <option value="karbon" id="opt-karbon">Karbon Çelik (Siyah Sac)</option>
+                <option value="paslanmaz" id="opt-paslanmaz" selected>Paslanmaz Çelik</option>
+                <option value="aluminyum" id="opt-aluminyum">Alüminyum</option>
+                <option value="titanyum" id="opt-titanyum">Titanyum (Özel)</option>
+                <option value="bakir" id="opt-bakir">Bakır / Bronz</option>
+                <option value="inconel" id="opt-inconel">Inconel (Nikel Alaşım)</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label id="lbl-pozisyon" for="pozisyon">AWS Pozisyon Kodu</label>
+            <select id="pozisyon">
+                <optgroup id="grp-alin" label="Alın Kaynakları (Groove - G)">
+                    <option value="1g" id="opt-1g">1G : Düz Alın (Yere paralel)</option>
+                    <option value="2g" id="opt-2g">2G : Yatay Alın</option>
+                    <option value="3g" id="opt-3g">3G : Dikey Alın</option>
+                    <option value="4g" id="opt-4g">4G : Tavan Alın</option>
+                </optgroup>
+                <optgroup id="grp-kose" label="Köşe Kaynakları (Fillet - F)">
+                    <option value="1f" id="opt-1f">1F : Düz Köşe (V Yatağı)</option>
+                    <option value="2f" id="opt-2f" selected>2F : Yatay Köşe (T-Birleştirme Masada)</option>
+                    <option value="3f" id="opt-3f">3F : Dikey Köşe</option>
+                    <option value="4f" id="opt-4f">4F : Tavan Köşe</option>
+                </optgroup>
+            </select>
+        </div>
+        <div class="form-group">
+            <div class="slider-header">
+                <label id="lbl-kalinlik" for="kalinlik">Metal Kalınlığı:</label>
+                <span id="kalinlik-val" style="font-weight: 800; color: #f39c12;">2.0 mm</span>
+            </div>
+            <input type="range" id="kalinlik" min="0.8" max="15.0" step="0.2" value="2.0">
+        </div>
+    </div>
+
+    <!-- METAL VE TEL SEÇİMİ -->
+    <div class="controls-row-2">
+        <div class="info-box" id="metal-info"></div>
+        <div class="form-group" style="margin-top: 5px;">
+            <label id="lbl-sarf" for="sarf-malzeme">Önerilen AWS Tel / Elektrot Sınıfı</label>
+            <select id="sarf-malzeme"></select>
+        </div>
+    </div>
+
+    <!-- SONUÇLAR -->
+    <div class="results" id="sonuclar"></div>
+</div>
+
+<script>
+    // --- ÇEVİRİ SÖZLÜĞÜ (i18n) ---
+    let currentLang = 'tr';
+    const dict = {
+        tr: {
+            baslik: "ULTIMATE KAYNAK SİMÜLATÖRÜ",
+            lblYontem: "Yöntem (Proses)",
+            lblMalzeme: "Ana Metal (Base Metal)",
+            lblPozisyon: "AWS Pozisyon Kodu",
+            lblKalinlik: "Metal Kalınlığı:",
+            lblSarf: "Önerilen AWS Tel / Elektrot Sınıfı",
+            optTig: "TIG (Argon / GTAW)", optMig: "MIG / MAG (Gazaltı / GMAW)", optMma: "MMA (Elektrot / SMAW)",
+            optKarbon: "Karbon Çelik (Siyah Sac)", optPaslanmaz: "Paslanmaz Çelik", optAluminyum: "Alüminyum",
+            optTitanyum: "Titanyum (Özel)", optBakir: "Bakır / Bronz", optInconel: "Inconel (Nikel Alaşım)",
+            grpAlin: "Alın Kaynakları (Groove - G)", opt1g: "1G : Düz Alın (Yere paralel)", opt2g: "2G : Yatay Alın", opt3g: "3G : Dikey Alın", opt4g: "4G : Tavan Alın",
+            grpKose: "Köşe Kaynakları (Fillet - F)", opt1f: "1F : Düz Köşe (V Yatağı)", opt2f: "2F : Yatay Köşe (T-Birleştirme Masada)", opt3f: "3F : Dikey Köşe", opt4f: "4F : Tavan Köşe",
+            kutuplama: "Akım Türü (Kutuplama)", ampr: "Amper / Akım", telCapi: "İlave Tel Çapı", iGneCapi: "Tungsten İğne Çapı", sonGaz: "Son Gaz (Post-Flow)",
+            gazDebisi: "Gaz Debisi (Akış)", hiz: "İlerleme Hızı", fincan: "Fincan (Nozzle) No", cikinti: "Tungsten Çıkıntısı", mesafe: "Ark Mesafesi", korumaGazi: "Koruma Gazı",
+            makineVolt: "Makine Voltajı", telSurme: "Tel Sürme Hızı", ruloTel: "Rulo Tel Çapı", prosesGaz: "Proses ve Gaz", serbestTel: "Serbest Tel Boyu", aci: "Torç Açısı", elektrotCapi: "Elektrot Çapı"
+        },
+        en: {
+            baslik: "ULTIMATE WELDING SIMULATOR",
+            lblYontem: "Method (Process)",
+            lblMalzeme: "Base Metal",
+            lblPozisyon: "AWS Position Code",
+            lblKalinlik: "Metal Thickness:",
+            lblSarf: "Recommended AWS Wire/Electrode Class",
+            optTig: "TIG (GTAW)", optMig: "MIG / MAG (GMAW)", optMma: "MMA (Stick / SMAW)",
+            optKarbon: "Carbon Steel", optPaslanmaz: "Stainless Steel", optAluminyum: "Aluminum",
+            optTitanyum: "Titanium (Special)", optBakir: "Copper / Bronze", optInconel: "Inconel (Nickel Alloy)",
+            grpAlin: "Groove Welds (G)", opt1g: "1G : Flat Groove", opt2g: "2G : Horizontal Groove", opt3g: "3G : Vertical Groove", opt4g: "4G : Overhead Groove",
+            grpKose: "Fillet Welds (F)", opt1f: "1F : Flat Fillet", opt2f: "2F : Horizontal Fillet (T-Joint)", opt3f: "3F : Vertical Fillet", opt4f: "4F : Overhead Fillet",
+            kutuplama: "Current Type (Polarity)", ampr: "Amperage / Current", telCapi: "Filler Wire Dia", iGneCapi: "Tungsten Dia", sonGaz: "Post-Flow",
+            gazDebisi: "Gas Flow Rate", hiz: "Travel Speed", fincan: "Cup (Nozzle) Size", cikinti: "Tungsten Stick-out", mesafe: "Arc Length", korumaGazi: "Shielding Gas",
+            makineVolt: "Machine Voltage", telSurme: "Wire Feed Speed", ruloTel: "Spool Wire Dia", prosesGaz: "Process & Gas", serbestTel: "Wire Stick-out", aci: "Torch Angle", elektrotCapi: "Electrode Dia"
+        }
+    };
+
+    function t(key) { return dict[currentLang][key] || key; }
+
+    function setLang(lang) {
+        currentLang = lang;
+        document.getElementById('btn-tr').classList.toggle('active', lang === 'tr');
+        document.getElementById('btn-en').classList.toggle('active', lang === 'en');
+
+        document.getElementById('baslik').innerText = t('baslik');
+        document.getElementById('lbl-yontem').innerText = t('lblYontem');
+        document.getElementById('lbl-malzeme').innerText = t('lblMalzeme');
+        document.getElementById('lbl-pozisyon').innerText = t('lblPozisyon');
+        document.getElementById('lbl-kalinlik').innerText = t('lblKalinlik');
+        document.getElementById('lbl-sarf').innerText = t('lblSarf');
+
+        document.getElementById('opt-tig').innerText = t('optTig');
+        document.getElementById('opt-mig').innerText = t('optMig');
+        document.getElementById('opt-mma').innerText = t('optMma');
+        document.getElementById('opt-karbon').innerText = t('optKarbon');
+        document.getElementById('opt-paslanmaz').innerText = t('optPaslanmaz');
+        document.getElementById('opt-aluminyum').innerText = t('optAluminyum');
+        document.getElementById('opt-titanyum').innerText = t('optTitanyum');
+        document.getElementById('opt-bakir').innerText = t('optBakir');
+        document.getElementById('opt-inconel').innerText = t('optInconel');
+
+        document.getElementById('grp-alin').label = t('grpAlin');
+        document.getElementById('opt-1g').innerText = t('opt1g');
+        document.getElementById('opt-2g').innerText = t('opt2g');
+        document.getElementById('opt-3g').innerText = t('opt3g');
+        document.getElementById('opt-4g').innerText = t('opt4g');
+        document.getElementById('grp-kose').label = t('grpKose');
+        document.getElementById('opt-1f').innerText = t('opt1f');
+        document.getElementById('opt-2f').innerText = t('opt2f');
+        document.getElementById('opt-3f').innerText = t('opt3f');
+        document.getElementById('opt-4f').innerText = t('opt4f');
+
+        updateArayuz();
+    }
+
+    // --- ORİJİNAL HESAPLAMA ALGORİTMASI ---
+    const metalData = {
+        karbon: { kod: "S235JR (St37), S275, S355, C45", carpan: 40 },
+        paslanmaz: { kod: "304, 304L, 316L, 309, 430", carpan: 30 },
+        aluminyum: { kod: "1050, 5083, 5754, 6061, 7075", carpan: 45 },
+        titanyum: { kod: "Grade 2 (Saf), Grade 5 (Ti-6Al-4V)", carpan: 25 },
+        bakir: { kod: "Cu-ETP, Cu-DHP, CuSn (Bronz)", carpan: 55 },
+        inconel: { kod: "Inconel 625, Inconel 718", carpan: 25 }
+    };
+
+    const sarfMalzemeler = {
+        tig: {
+            karbon: ['ER70S-6 / SG2 (Standart)', 'ER80S-D2'],
+            paslanmaz: ['ER308L (304 serisi için)', 'ER316L (316 için)', 'ER309L (P.lanmaz-Demir için)'],
+            aluminyum: ['ER4043 (AlSi5)', 'ER5356 (AlMg5 - Serttir)'],
+            titanyum: ['ERTi-2 (Saf)', 'ERTi-5 (Havacılık)'],
+            bakir: ['ERCu (Saf Bakır)', 'ERCuSi-A (Silikon Bronz)'],
+            inconel: ['ERNiCrMo-3 (625 için)']
+        },
+        mig: {
+            karbon: ['ER70S-6 (SG2 Dolu Tel)', 'E71T-1 (Özlü Tel - FCAW)'],
+            paslanmaz: ['ER308L (MIG Teli)', 'ER316L (MIG Teli)'],
+            aluminyum: ['ER4043 (Rulo)', 'ER5356 (Teflon spiral şart)'],
+            titanyum: ['ERTi-2 (Kapalı kabin ister)'],
+            bakir: ['ERCu', 'ERCuSi-A (MIG Lehimleme)'],
+            inconel: ['ERNiCrMo-3']
+        },
+        mma: {
+            karbon: ['E6013 (Rutil)', 'E7018 (Bazik - Çok sağlam)', 'E6010 (Selülozik)'],
+            paslanmaz: ['E308L-16 (Rutil-Bazik)', 'E316L-16'],
+            aluminyum: ['E4043 (DC+ Kutuplama)'],
+            titanyum: ['MÜMKÜN DEĞİL! (Titanyum örtülü elektrotla kaynatılmaz)'],
+            bakir: ['ECu (Saf Bakır)', 'ECuSn-A'],
+            inconel: ['ENiCrMo-3']
+        }
+    };
+
+    function kartOlustur(baslik, deger, sinif, not) {
+        return `<div class="card ${sinif}">
+                    <h4>${baslik}</h4>
+                    <div class="value">${deger}</div>
+                    ${not ? `<span class="critical-note">${not}</span>` : ''}
+                </div>`;
+    }
+
+    function updateArayuz() {
+        let yontem = document.getElementById('yontem').value;
+        let malzeme = document.getElementById('malzeme').value;
+        let pozisyon = document.getElementById('pozisyon').value;
+        let kalinlik = parseFloat(document.getElementById('kalinlik').value);
+
+        document.getElementById('kalinlik-val').innerText = kalinlik.toFixed(1) + ' mm';
+        let alanKoduMetni = currentLang === 'tr' ? "Alaşım / Sektör Kodu" : "Alloy / Sector Code";
+        document.getElementById('metal-info').innerHTML = `<strong>${alanKoduMetni} (${malzeme.toUpperCase()}):</strong> ${metalData[malzeme].kod}`;
+
+        let sarfSelect = document.getElementById('sarf-malzeme');
+        sarfSelect.innerHTML = "";
+        sarfMalzemeler[yontem][malzeme].forEach(secenek => {
+            sarfSelect.appendChild(new Option(secenek, secenek));
+        });
+
+        // Pozisyon Çarpanları
+        let pozisyonIsiCarpani = 1.0;
+        if(pozisyon.includes('f')) pozisyonIsiCarpani += 0.10; // Köşe (T-Joint) fazla ısı ister
+        if(pozisyon === '3g' || pozisyon === '3f' || pozisyon === '4g' || pozisyon === '4f') {
+            pozisyonIsiCarpani -= 0.15; // Dikey/Tavan amperi düşürtür
+        }
+
+        let s = ""; // Html Sonucu
+
+        if (yontem === 'tig') {
+            let amper = kalinlik * metalData[malzeme].carpan * pozisyonIsiCarpani;
+            if(amper < 10) amper = 10; if(amper > 350) amper = 350;
+
+            // Tel Çapı (İlave)
+            let telCapi = "1.6 mm";
+            if(kalinlik >= 2.5) telCapi = "2.0 mm veya 2.4 mm";
+            if(kalinlik >= 5) telCapi = "3.2 mm";
+
+            // Tungsten Çapı (Standartlara uygun)
+            let tungstenCapi = "1.6 mm";
+            if(kalinlik >= 2.5) tungstenCapi = "2.4 mm";
+            if(kalinlik >= 5) tungstenCapi = "3.2 mm";
+
+            // Kutuplama (AC/DC)
+            let tigKutup = (malzeme === 'aluminyum') ? "AC (Alternatif Akım) ŞART!" : "DC- (Torç Ekside / DCEN)";
+
+            // Gaz ve Son Gaz
+            let gazTuru = "%100 Saf Argon";
+            let gazDebisi = Math.min((kalinlik * 1.5) + 6, 18);
+            let cfh = Math.round(gazDebisi * 2.12); // CFH Çevirisi
+            let sonGaz = (malzeme === 'paslanmaz' || malzeme === 'titanyum') ? (kalinlik * 3.5) : (kalinlik * 2);
+            if(sonGaz < 4) sonGaz = 4.0;
+
+            // Hızlar ve Fiziksel Çıkıntılar
+            let ilerlemeHizi = Math.max(10, Math.floor(22 - kalinlik * 2));
+            let fincanNo = kalinlik < 2.5 ? "#6 / #7" : (malzeme === 'titanyum' ? "#12 (Gaz Merceği Şart)" : "#8");
+            let tungstenCikinti = pozisyon.includes('f') ? "4-5 mm" : "2-3 mm";
+
+            let lblSec = currentLang === 'tr' ? " Saniye" : " Sec";
+
+            s += kartOlustur(t('kutuplama'), tigKutup, "highlight-green", "");
+            s += kartOlustur(t('ampr'), `${Math.floor(amper*0.9)} - ${Math.ceil(amper*1.1)} A`, "highlight", "");
+            s += kartOlustur(t('telCapi'), telCapi, "highlight-orange", "");
+            s += kartOlustur(t('iGneCapi'), tungstenCapi, "highlight-blue", "");
+            s += kartOlustur(t('sonGaz'), `${sonGaz.toFixed(1)}${lblSec}`, "highlight", "");
+            s += kartOlustur(t('gazDebisi'), `${Math.round(gazDebisi)} L/dk (≈ ${cfh} CFH)`, "highlight-green", "");
+            s += kartOlustur(t('hiz'), `~ ${ilerlemeHizi} cm/dk`, "");
+            s += kartOlustur(t('fincan'), fincanNo, "highlight-purple");
+            s += kartOlustur(t('cikinti'), tungstenCikinti, "");
+            s += kartOlustur(t('mesafe'), "1.5 - 2 mm", "");
+            s += kartOlustur(t('korumaGazi'), gazTuru, "", "");
+        }
+        else if (yontem === 'mig') {
+            let telCapi = "0.8 mm";
+            if (kalinlik >= 3 && kalinlik < 6) telCapi = "1.0 mm";
+            if (kalinlik >= 6) telCapi = "1.2 mm";
+
+            let voltaj = 14 + (kalinlik * 1.5) * pozisyonIsiCarpani;
+            let telHizi = (kalinlik * 2.5) * pozisyonIsiCarpani;
+
+            let gazTuru = "%100 Saf Argon (MIG)";
+            if (malzeme === 'karbon') gazTuru = "%82 Ar + %18 CO2 (MAG M21)";
+            if (malzeme === 'paslanmaz') gazTuru = "%97.5 Ar + %2.5 CO2 (MAG M12)";
+
+            // MIG gazı kapalı alanda maks 18 idealdir, fazlası havuzu köpürtür
+            let gazDebisi = Math.min((kalinlik * 1.2) + 10, 18);
+            let cfh = Math.round(gazDebisi * 2.12);
+            let ilerlemeHizi = Math.max(15, Math.floor(35 - kalinlik * 1.5));
+
+            s += kartOlustur(t('makineVolt'), `${Math.floor(voltaj)} - ${Math.ceil(voltaj+1.5)} V`, "highlight", "");
+            s += kartOlustur(t('telSurme'), `${telHizi.toFixed(1)} - ${(telHizi+1.5).toFixed(1)} m/dk`, "highlight", "");
+            s += kartOlustur(t('ruloTel'), telCapi, "highlight-orange");
+            s += kartOlustur(t('gazDebisi'), `${Math.round(gazDebisi)} L/dk (≈ ${cfh} CFH)`, "highlight-green", "");
+            s += kartOlustur(t('hiz'), `~ ${ilerlemeHizi} cm/dk`, "");
+            s += kartOlustur(t('prosesGaz'), gazTuru, "highlight-blue");
+            s += kartOlustur(t('serbestTel'), "10 - 15 mm", "");
+            s += kartOlustur(t('aci'), "10-15°", "");
+        }
+        else if (yontem === 'mma') {
+            if (malzeme === 'titanyum') {
+                s = kartOlustur("HATA / ERROR", "İşlem Yapılamaz / N/A", "highlight", "");
+            } else {
+                let telCapi = "2.5 mm";
+                let bazAmper = 80;
+                if(kalinlik < 2.5) { telCapi = "2.0 mm"; bazAmper = 60; }
+                else if(kalinlik >= 4 && kalinlik < 8) { telCapi = "3.2 mm"; bazAmper = 115; }
+                else if(kalinlik >= 8) { telCapi = "4.0 mm"; bazAmper = 160; }
+
+                bazAmper = bazAmper * pozisyonIsiCarpani;
+                let ilerlemeHizi = Math.max(8, Math.floor(20 - kalinlik));
+
+                let kutup = "DC+";
+                if(malzeme === 'karbon' && document.getElementById('sarf-malzeme').value.includes('E6013')) kutup = "DC- / AC";
+
+                s += kartOlustur(t('elektrotCapi'), telCapi, "highlight-orange");
+                s += kartOlustur(t('ampr'), `${Math.floor(bazAmper*0.85)} - ${Math.ceil(bazAmper*1.1)} A`, "highlight", "");
+                s += kartOlustur(t('kutuplama'), kutup, "highlight-green");
+                s += kartOlustur(t('hiz'), `~ ${ilerlemeHizi} cm/dk`, "");
+                s += kartOlustur(t('mesafe'), telCapi, "highlight-blue", "");
+                s += kartOlustur(t('aci'), "20-30°", "", "");
+            }
+        }
+
+        document.getElementById('sonuclar').innerHTML = s;
+    }
+
+    document.getElementById('yontem').addEventListener('change', updateArayuz);
+    document.getElementById('malzeme').addEventListener('change', updateArayuz);
+    document.getElementById('pozisyon').addEventListener('change', updateArayuz);
+    document.getElementById('kalinlik').addEventListener('input', updateArayuz);
+
+    updateArayuz(); // İlk yüklemede çalıştır
+</script>
+
+</body>
+</html>
